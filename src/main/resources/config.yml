@@ -1,0 +1,8 @@
+http:
+  api:
+    host: localhost
+    port: 23333
+bukkit:
+  channel: bKuJmnE0z:ZYv3uJrFb
+  sub-server-names:
+    - lobby
