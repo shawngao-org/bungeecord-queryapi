@@ -15,8 +15,9 @@ public class Reload extends Command {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (sender instanceof ProxiedPlayer) {
-            ((ProxiedPlayer) sender).sendMessage(
-                    new ComponentBuilder("This command is only allowed to be executed in the console.")
+            sender.sendMessage(
+                    new ComponentBuilder(
+                            "This command is only allowed to be executed in the console.")
                             .color(ChatColor.RED).create());
             return;
         }

@@ -6,16 +6,19 @@ import net.md_5.bungee.api.plugin.Plugin;
 import org.shawngao.bc.queryapi.command.Reload;
 import org.shawngao.bc.queryapi.command.Test;
 import org.shawngao.bc.queryapi.config.Configure;
+import org.shawngao.bc.queryapi.server.HttpServerHandler;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Map;
 
 public final class QueryApi extends Plugin {
 
     private SimpleServer server;
-    private Configure configure;
-
     public static Plugin instance;
     public static Configure staticConfigure;
+    public static SimpleServer simpleServer;
 
     @Override
     public void onEnable() {
@@ -29,15 +32,27 @@ public final class QueryApi extends Plugin {
     }
 
     public void initPlugin() {
-        configure = processConfigure();
+        Configure configure = processConfigure();
         staticConfigure = configure;
-        getLogger().info("Enabling plugin channels ...");
-        this.getProxy().registerChannel(configure.getBukkitChannel());
-        getLogger().info("Channel " + configure.getBukkitChannel() + " was registered.");
-        getLogger().info("Done.");
         getLogger().info("Starting http server ...");
         server = new SimpleServer(configure.getHost(), configure.getPort());
+        simpleServer = server;
+        HttpServerHandler httpServerHandler = new HttpServerHandler();
+        Map<String, Boolean> services = configure.getServiceMap();
+        services.forEach((k, v) -> {
+            if (v) {
+                try {
+                    Method method = httpServerHandler.getClass()
+                            .getDeclaredMethod(k);
+                    method.invoke(httpServerHandler);
+                    getLogger().info(k + " was loaded .");
+                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
         server.start();
+        getLogger().info("Http server was started.");
     }
 
     private Configure processConfigure() {
@@ -63,10 +78,6 @@ public final class QueryApi extends Plugin {
         getLogger().info("Stopping http server ...");
         server.getRawServer().stop(0);
         getLogger().info("Stopped http server.");
-        getLogger().info("Unregistering plugin channel ...");
-        this.getProxy().unregisterChannel(configure.getBukkitChannel());
-        getLogger().info("Channel " + configure.getBukkitChannel() + " was unregistered.");
-        getLogger().info("Unregistered plugin channel.");
         getLogger().info("Disabled this plugin.");
     }
 }
