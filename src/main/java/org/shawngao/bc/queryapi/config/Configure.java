@@ -12,8 +12,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Getter
 public class Configure {
@@ -23,7 +21,6 @@ public class Configure {
     private String host;
     private int port;
     private List<String> clientList;
-    private Map<String, Boolean> serviceMap;
 
     private final Plugin plugin = QueryApi.instance;
 
@@ -46,12 +43,5 @@ public class Configure {
         host = configuration.getString("http.api.host");
         port = configuration.getInt("http.api.port");
         clientList = configuration.getStringList("bukkit.client");
-        serviceMap = configuration.getStringList("bukkit.service")
-                .stream().collect(
-                        Collectors.toMap(
-                                p -> p.split(":")[0],
-                                q -> Boolean.valueOf(q.split(":")[1]),
-                                (k1, k2) -> k1
-                ));
     }
 }
